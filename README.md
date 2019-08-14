@@ -1,0 +1,2 @@
+# fabric_defects_detection
+2019广东工业智造创新大赛：布匹疵点智能识别
