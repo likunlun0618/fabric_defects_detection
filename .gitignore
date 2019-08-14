@@ -108,3 +108,5 @@ venv.bak/
 
 #document
 *.json
+
+data/
