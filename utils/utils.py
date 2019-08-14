@@ -14,7 +14,7 @@ def ShowBBox(img,bbox):
                         size=np.floor(3e-2 * img_PIL.size[1] + 0.5).astype('int32'))
         label = '{} {:.2f}'.format(int(bbox[i][4]), 1.0)
         draw = ImageDraw.Draw(img_PIL)  
-        draw.text((int(bbox[i][2]),int(bbox[i][1])), label, font=font, fill=(0,0,0)) 
+        draw.text((int(bbox[i][2]),int(bbox[i][1])), label, font=font, fill=(255,0,0)) 
      
     img_OpenCV = cv2.cvtColor(np.asarray(img_PIL),cv2.COLOR_RGB2BGR) 
     for i in range(bbox.shape[0]):
