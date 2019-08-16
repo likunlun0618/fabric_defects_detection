@@ -15,7 +15,7 @@ class FabricDefects(Dataset):
     '''
 
     defect_label = {
-        'normal':0,
+        # 'normal':0,
         '三丝':1, '修痕':2, '双纬':3, '吊经':4, '断氨纶':5, '断经':6,
         '星跳':7, '松经':8, '死皱':9, '毛粒':10, '水渍':11, '污渍':12,
         '油渍':13, '浆斑':14, '浪纹档':15, '烧毛痕':16, '百脚':17, '破洞':18,
@@ -53,14 +53,14 @@ class FabricDefects(Dataset):
 
             # 读取bounding box
             bbox = self.defect_data[idx]['bbox']
-            bbox.append([0, 0, w-1, h-1])
+            # bbox.append([0, 0, w-1, h-1])
             bbox = torch.tensor(bbox) / self.scale
 
             # 读取瑕疵的类别
             label = []
             for defect_name in self.defect_data[idx]['defect_name']:
-                label.append(self.defect_label[defect_name])
-            label.append(0)
+                label.append(self.defect_label[defect_name] - 1)
+            # label.append(0)
             label = torch.tensor(label)
             return img, {'boxes':bbox, 'labels':label}
 
@@ -81,7 +81,8 @@ class FabricDefects(Dataset):
 
 
     def __len__(self):
-        return self.defect_size + self.normal_size
+        # return self.defect_size + self.normal_size
+        return self.defect_size
 
     def merge(self, gt_result):
         '''
@@ -109,13 +110,13 @@ class FabricDefects(Dataset):
 
         return result
 
-    def visualize(self, img, boxes, labels):
+    def visualize(self, img, boxes, labels, color=(0,255,0)):
         if type(img) == torch.Tensor:
             img = TF.to_pil_image(img.clamp(0, 1))
             img = np.array(img)
         for i in range(boxes.shape[0]):
             x1, y1, x2, y2 = boxes[i]
-            cv2.rectangle(img, (x1,y1), (x2,y2), (0,255,0), 1)
+            cv2.rectangle(img, (x1,y1), (x2,y2), color, 1)
         return img
 
 
