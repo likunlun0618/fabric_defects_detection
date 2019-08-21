@@ -3,24 +3,32 @@ from tqdm import tqdm
 import json
 import cv2
 from utils.utils import *
-with open("./Annotations/gt_result.json",'r') as load_f:
+with open("./data/guangdong1_round1_train1_20190818/guangdong1_round1_train1_20190818/Annotations/anno_train.json",'r') as load_f:
     load_dict = json.load(load_f)
-    #print(load_dict)
+    print(load_dict[:2])
 
+
+for _iter in load_dict:
+    defect_name
+'''
 defect_name_round1 = []
 for line in open("defect_name.txt","r"): #read defect name
     defect_name_round1.append(line[:-1].split(',')[0])
 
-count=np.zeros((28,1))
+#count=np.zeros((28,1))
+count1=0
 for line in tqdm(open("defect_box.txt","r")): #read defect bbox
+    count1=count1+1
+    if count1<1300:
+        continue   
     img=cv2.imread('./defect_Images/'+line.split(' ')[0])
     bbox_list=line.split(' ')[1:]
     bbox=[]
     for i in range(len(bbox_list)):
-        count[int(bbox_list[i].split(',')[4]),0]=count[int(bbox_list[i].split(',')[4]),0]+1
+        #count[int(bbox_list[i].split(',')[4]),0]=count[int(bbox_list[i].split(',')[4]),0]+1
         bbox.append(bbox_list[i].split(','))
     bbox=np.array(bbox,dtype=np.float32)
-    ShowBBox(img,bbox)
+    ShowBBox(img,bbox)'''
     #break
 
 
