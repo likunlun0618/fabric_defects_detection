@@ -61,7 +61,7 @@ def DrawBBox(img,bbox,label,Pred=True):
         print_label = '{} {:.2f}'.format(int(label[i]), 1.0)
         draw = ImageDraw.Draw(img_PIL) 
         if Pred: 
-            draw.text((int(bbox[i][2])-100,int(bbox[i][1])), print_label, font=font, fill=(255,0,0)) 
+            draw.text((int(bbox[i][2])-100,int(bbox[i][1]-50)), print_label, font=font, fill=(255,0,0)) 
         else:
             draw.text((int(bbox[i][2])-100,int(bbox[i][1])), print_label, font=font, fill=(0,255,0)) 
      
@@ -70,3 +70,29 @@ def DrawBBox(img,bbox,label,Pred=True):
         cv2.rectangle(img_OpenCV, (int(bbox[i][0]),int(bbox[i][1])), (int(bbox[i][2]),int(bbox[i][3])), colors[int(label[i])],2)
 
     return img_OpenCV
+
+def merge(gt_result):
+    '''
+    把gt_result中有相同name的项组合起来
+    '''
+    name_dict = {}
+    for item in gt_result:
+        name = item['name']
+        if name in name_dict:
+            name_dict[name]['bbox'].append(item['bbox'])
+            name_dict[name]['defect_name'].append(item['defect_name'])
+        else:
+            name_dict[name] = {
+                'bbox': [item['bbox']],
+                'defect_name': [item['defect_name']]
+            }
+
+    result = []
+    for name in name_dict:
+        result.append({
+            'name': name,
+            'bbox': name_dict[name]['bbox'],
+            'defect_name': name_dict[name]['defect_name']
+        })
+
+    return result

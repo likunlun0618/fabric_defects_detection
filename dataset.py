@@ -134,6 +134,112 @@ class FabricDefects(Dataset):
             count=count+1
         return defect_label'''
 
+    def nms(self,bounding_boxes, confidence_score, label,threshold):
+        # If no bounding boxes, return empty list
+        if len(bounding_boxes) == 0:
+            return [], [],[]
+        #top, left, bottom, right = box
+        # Bounding boxes
+        boxes = np.array(bounding_boxes)
+
+        # coordinates of bounding boxes
+        start_x = boxes[:, 1]
+        start_y = boxes[:, 0]
+        end_x = boxes[:, 3]
+        end_y = boxes[:, 2]
+
+        # Confidence scores of bounding boxes
+        score = np.array(confidence_score)
+
+        # Picked bounding boxes
+        picked_boxes = []
+        picked_score = []
+        picked_label = []
+        # Compute areas of bounding boxes
+        areas = (end_x - start_x + 1) * (end_y - start_y + 1)
+
+        # Sort by confidence score of bounding boxes
+        order = np.argsort(score)
+        #print(order)
+        # Iterate bounding boxes
+        while order.size > 0:
+            # The index of largest confidence score
+            index = order[-1]
+
+            # Pick the bounding box with largest confidence score
+            picked_boxes.append(bounding_boxes[index])
+            picked_score.append(confidence_score[index])
+            picked_label.append(label[index])
+            # Compute ordinates of intersection-over-union(IOU)
+            x1 = np.maximum(start_x[index], start_x[order[:-1]])
+            x2 = np.minimum(end_x[index], end_x[order[:-1]])
+            y1 = np.maximum(start_y[index], start_y[order[:-1]])
+            y2 = np.minimum(end_y[index], end_y[order[:-1]])
+
+            # Compute areas of intersection-over-union
+            w = np.maximum(0.0, x2 - x1 + 1)
+            h = np.maximum(0.0, y2 - y1 + 1)
+            intersection = w * h
+
+            # Compute the ratio between intersection and union
+            ratio = intersection / (areas[index] + areas[order[:-1]] - intersection)
+
+            left = np.where(ratio < threshold)
+            order = order[left]
+
+        return picked_boxes, picked_score,picked_label
+
+    def bounding_box_delete(self,out_boxes, out_scores, out_classes):
+        delete=[]
+        add=[]
+        if 1:
+            start_x = out_boxes[:, 1]
+            start_y = out_boxes[:, 0]
+            end_x = out_boxes[:, 3]
+            end_y = out_boxes[:, 2]
+            # Compute areas of bounding boxes
+            areas = (end_x - start_x + 1) * (end_y - start_y + 1)
+
+        for i in range(out_boxes.shape[0]):
+            for j in range(out_boxes.shape[0]):
+                if i!=j:
+                    if out_classes[i]==out_classes[j]:
+                        if ((out_boxes[j][0]>out_boxes[i][0]) and (out_boxes[j][1]>out_boxes[i][1]) and
+                                (out_boxes[j][2]<out_boxes[i][2]) and (out_boxes[j][3]<out_boxes[i][3])):
+
+                            delete.append(j)
+                        else:
+                            if 1:
+                                x1 = np.maximum(start_x[i], start_x[j])
+                                x2 = np.minimum(end_x[i], end_x[j])
+                                y1 = np.maximum(start_y[i], start_y[j])
+                                y2 = np.minimum(end_y[i], end_y[j])
+                                # Compute areas of intersection-over-union
+                                w = np.maximum(0.0, x2 - x1 + 1)
+                                h = np.maximum(0.0, y2 - y1 + 1)
+                                intersection = w * h
+                                if  intersection/areas[j]>0.85:
+                                    delete.append(j)
+                                #elif intersection>0 and areas[j]>3*areas[i]:
+                                #    add.append(out_classes[j])
+
+        out_boxes=np.delete(out_boxes, delete, axis=0)
+        out_scores=np.delete(out_scores, delete, axis=0)
+        out_classes=np.delete(out_classes, delete, axis=0)
+
+        #print(out_classes.shape)
+        
+        #print(add.shape)
+        #out_classes.extend(add)
+        if 0:
+            add=np.array(add)
+            #for i in range (len(out_classes)):
+            if len(add):
+                print(1)
+                out_classes=np.concatenate((out_classes,add),axis=0)
+                #out_classes=np.row_stack((out_classes, add))
+        return out_boxes, out_scores, out_classes
+
 
 if __name__ == '__main__':
 
